@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Add Patient{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5>Add Patient</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input name="name" class="form-control" required>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label>Age</label><input name="age" type="number" class="form-control"></div>
+        <div class="col-md-4 mb-3"><label>Gender</label><input name="gender" class="form-control"></div>
+        <div class="col-md-4 mb-3"><label>Phone</label><input name="phone" class="form-control"></div>
+      </div>
+      <div class="mb-3">
+        <label>Email</label>
+        <input name="email" type="email" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label>Notes</label>
+        <textarea name="notes" class="form-control" rows="3"></textarea>
+      </div>
+      <button class="btn btn-success">Add</button>
+      <a href="{{ url_for('patients') }}" class="btn btn-link">Back</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

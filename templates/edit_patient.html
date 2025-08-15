@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Edit Patient{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5>Edit Patient</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input name="name" class="form-control" required value="{{ patient['name'] }}">
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label>Age</label><input name="age" type="number" class="form-control" value="{{ patient['age'] }}"></div>
+        <div class="col-md-4 mb-3"><label>Gender</label><input name="gender" class="form-control" value="{{ patient['gender'] }}"></div>
+        <div class="col-md-4 mb-3"><label>Phone</label><input name="phone" class="form-control" value="{{ patient['phone'] }}"></div>
+      </div>
+      <div class="mb-3">
+        <label>Email</label>
+        <input name="email" type="email" class="form-control" value="{{ patient['email'] }}">
+      </div>
+      <div class="mb-3">
+        <label>Notes</label>
+        <textarea name="notes" class="form-control" rows="3">{{ patient['notes'] }}</textarea>
+      </div>
+      <button class="btn btn-primary">Save</button>
+      <a href="{{ url_for('patients') }}" class="btn btn-link">Back</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

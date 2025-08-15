@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Total Patients</h6>
+      <h2 class="mt-2">{{ total_patients }}</h2>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Upcoming Appointments</h6>
+      <h2 class="mt-2">{{ upcoming_appointments }}</h2>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Open Alerts</h6>
+      <h2 class="mt-2">{{ open_alerts }}</h2>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-body">
+    <h5>Recent Alerts</h5>
+    {% if recent_alerts %}
+      <ul class="list-group list-group-flush">
+        {% for a in recent_alerts %}
+          <li class="list-group-item">
+            <strong>[{{ a['severity']|upper }}]</strong>
+            {{ a['message'] }} 
+            {% if a['patient_name'] %}- <em>{{ a['patient_name'] }}</em>{% endif %}
+            <span class="float-end text-muted small">{{ a['created_at'] }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="text-muted">No recent alerts.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
