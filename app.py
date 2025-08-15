@@ -2,6 +2,11 @@ import sqlite3
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g
 from datetime import timedelta
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from flask import send_file
+import io
+
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(APP_DIR, 'database.db')
@@ -251,7 +256,64 @@ def delete_appointment(aid):
     db.commit()
     flash('Appointment deleted', 'info')
     return redirect(url_for('appointments'))
+@app.route('/patients/<int:pid>/download')
+@login_required
+def download_patient_pdf(pid):
+    db = get_db()
+    patient = db.execute("SELECT * FROM patients WHERE id = ?", (pid,)).fetchone()
+    if not patient:
+        flash('Patient not found', 'danger')
+        return redirect(url_for('patients'))
 
+    # Optionally also get their latest appointment
+    appointment = db.execute("""
+        SELECT * FROM appointments WHERE patient_id = ? ORDER BY datetime(datetime) DESC LIMIT 1
+    """, (pid,)).fetchone()
+
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    y = height - 50
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y, f"Patient Report - {patient['name']}")
+
+    y -= 40
+    p.setFont("Helvetica", 12)
+    p.drawString(50, y, f"Name: {patient['name']}")
+    y -= 20
+    p.drawString(50, y, f"Age: {patient['age'] or 'N/A'}")
+    y -= 20
+    p.drawString(50, y, f"Gender: {patient['gender'] or 'N/A'}")
+    y -= 20
+    p.drawString(50, y, f"Phone: {patient['phone'] or 'N/A'}")
+    y -= 20
+    p.drawString(50, y, f"Email: {patient['email'] or 'N/A'}")
+    y -= 20
+    p.drawString(50, y, f"Notes: {patient['notes'] or ''}")
+
+    if appointment:
+        y -= 40
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(50, y, "Latest Appointment Details")
+        p.setFont("Helvetica", 12)
+        y -= 20
+        p.drawString(50, y, f"Date & Time: {appointment['datetime']}")
+        y -= 20
+        p.drawString(50, y, f"Doctor: {appointment['doctor'] or 'N/A'}")
+        y -= 20
+        p.drawString(50, y, f"Reason: {appointment['reason'] or 'N/A'}")
+        y -= 20
+        p.drawString(50, y, f"Status: {appointment['status']}")
+
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True,
+                     download_name=f"patient_{patient['id']}.pdf",
+                     mimetype='application/pdf')
 # ----------------- Alerts -----------------
 
 @app.route('/alerts')
