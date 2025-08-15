@@ -16,7 +16,16 @@
 </form>
 
 <table class="table table-sm table-hover">
-  <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Phone</th><th>Email</th><th>Actions</th></tr></thead>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Age</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
   <tbody>
     {% for p in patients %}
       <tr>
@@ -30,6 +39,8 @@
           <form method="post" action="{{ url_for('delete_patient', pid=p['id']) }}" style="display:inline" onsubmit="return confirm('Delete patient?');">
             <button class="btn btn-sm btn-danger">Delete</button>
           </form>
+          <!-- Download PDF button -->
+          <a href="{{ url_for('download_patient_pdf', pid=p['id']) }}" class="btn btn-sm btn-success">Download PDF</a>
         </td>
       </tr>
     {% endfor %}
