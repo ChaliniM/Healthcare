@@ -1,8 +1,11 @@
 import sqlite3
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g
-from datetime import timedelta
+from datetime import timedelta,datetime
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfgen import canvas
 from flask import send_file
 import io
@@ -231,12 +234,17 @@ def add_appointment():
         if not (patient_id and dt):
             flash('Patient and datetime are required', 'danger')
             return redirect(url_for('add_appointment'))
+        
         db.execute("INSERT INTO appointments (patient_id, datetime, doctor, reason) VALUES (?, ?, ?, ?)",
                    (patient_id, dt, doctor, reason))
         db.commit()
         flash('Appointment scheduled', 'success')
-        return redirect(url_for('appointments'))
+        
+        # Redirect straight to PDF download after booking
+        return redirect(url_for('download_patient_pdf', pid=patient_id))
+    
     return render_template('add_appointment.html', patients=patients)
+
 
 @app.route('/appointments/update_status/<int:aid>', methods=['POST'])
 @login_required
@@ -256,6 +264,8 @@ def delete_appointment(aid):
     db.commit()
     flash('Appointment deleted', 'info')
     return redirect(url_for('appointments'))
+
+
 @app.route('/patients/<int:pid>/download')
 @login_required
 def download_patient_pdf(pid):
@@ -265,56 +275,82 @@ def download_patient_pdf(pid):
         flash('Patient not found', 'danger')
         return redirect(url_for('patients'))
 
-    # Optionally also get their latest appointment
-    appointment = db.execute("""
-        SELECT * FROM appointments WHERE patient_id = ? ORDER BY datetime(datetime) DESC LIMIT 1
-    """, (pid,)).fetchone()
+    # Get all appointments for this patient
+    appointments = db.execute("""
+        SELECT datetime, doctor, reason, status
+        FROM appointments
+        WHERE patient_id = ?
+        ORDER BY datetime(datetime) DESC
+    """, (pid,)).fetchall()
 
-    # Create PDF in memory
     buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
 
-    y = height - 50
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, y, f"Patient Report - {patient['name']}")
+    # --- Logo (optional) ---
+    logo_path = os.path.join(APP_DIR, "static", "logo.png")  # Place your logo in /static/logo.png
+    if os.path.exists(logo_path):
+        elements.append(Image(logo_path, width=80, height=80))
+        elements.append(Spacer(1, 12))
 
-    y -= 40
-    p.setFont("Helvetica", 12)
-    p.drawString(50, y, f"Name: {patient['name']}")
-    y -= 20
-    p.drawString(50, y, f"Age: {patient['age'] or 'N/A'}")
-    y -= 20
-    p.drawString(50, y, f"Gender: {patient['gender'] or 'N/A'}")
-    y -= 20
-    p.drawString(50, y, f"Phone: {patient['phone'] or 'N/A'}")
-    y -= 20
-    p.drawString(50, y, f"Email: {patient['email'] or 'N/A'}")
-    y -= 20
-    p.drawString(50, y, f"Notes: {patient['notes'] or ''}")
+    # --- Title ---
+    elements.append(Paragraph(f"<b>Patient Medical Report</b>", styles['Title']))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
+    elements.append(Spacer(1, 24))
 
-    if appointment:
-        y -= 40
-        p.setFont("Helvetica-Bold", 14)
-        p.drawString(50, y, "Latest Appointment Details")
-        p.setFont("Helvetica", 12)
-        y -= 20
-        p.drawString(50, y, f"Date & Time: {appointment['datetime']}")
-        y -= 20
-        p.drawString(50, y, f"Doctor: {appointment['doctor'] or 'N/A'}")
-        y -= 20
-        p.drawString(50, y, f"Reason: {appointment['reason'] or 'N/A'}")
-        y -= 20
-        p.drawString(50, y, f"Status: {appointment['status']}")
+    # --- Patient Info Table ---
+    patient_data = [
+        ['Patient ID', patient['id']],
+        ['Name', patient['name']],
+        ['Age', patient['age'] or 'N/A'],
+        ['Gender', patient['gender'] or 'N/A'],
+        ['Phone', patient['phone'] or 'N/A'],
+        ['Email', patient['email'] or 'N/A'],
+        ['Notes', patient['notes'] or '']
+    ]
+    patient_table = Table(patient_data, colWidths=[100, 350])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (1, 0), colors.lightgrey),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(Paragraph("<b>Patient Information</b>", styles['Heading2']))
+    elements.append(patient_table)
+    elements.append(Spacer(1, 24))
 
-    p.showPage()
-    p.save()
+    # --- Appointments Table ---
+    if appointments:
+        elements.append(Paragraph("<b>Appointment History</b>", styles['Heading2']))
+        table_data = [['Date & Time', 'Doctor', 'Reason', 'Status']]
+        for appt in appointments:
+            table_data.append([
+                appt['datetime'],
+                appt['doctor'] or 'N/A',
+                appt['reason'] or 'N/A',
+                appt['status']
+            ])
+        appt_table = Table(table_data, colWidths=[120, 120, 150, 60])
+        appt_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(appt_table)
+    else:
+        elements.append(Paragraph("No appointment history found.", styles['Normal']))
+
+    # Build PDF
+    doc.build(elements)
     buffer.seek(0)
 
     return send_file(buffer, as_attachment=True,
-                     download_name=f"patient_{patient['id']}.pdf",
+                     download_name=f"patient_{patient['id']}_report.pdf",
                      mimetype='application/pdf')
-# ----------------- Alerts -----------------
+#-------------- Alerts -----------------
 
 @app.route('/alerts')
 @login_required
@@ -375,4 +411,3 @@ def create_user_demo():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
