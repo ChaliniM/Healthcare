@@ -218,8 +218,7 @@ a:hover {
     padding: 10px 12px;
     font-size: 1rem;
 }
-/* Add to your style.css for dashboard cards */
-/* ...existing code... */
+
 
 .stat-card {
     background: linear-gradient(120deg, #e0eafc 0%, #f7faff 100%);
