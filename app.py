@@ -96,10 +96,40 @@ def login_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
+def role_required(role):
+    """Decorator to restrict access to a specific role (e.g., 'admin')"""
+    from functools import wraps
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if 'role' not in session or session['role'] != role:
+                flash("You don't have permission to access this page.", 'danger')
+                # Redirect based on role
+                if session.get('role') == 'admin':
+                    return redirect(url_for('admin_dashboard'))
+                else:
+                    return redirect(url_for('user_dashboard'))
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+
+
 # ----------------- Routes -----------------
 @app.route('/')
 def root():
-    return redirect(url_for('dashboard') if 'user' in session else url_for('login'))
+    if 'user' in session:
+        if session['role'] == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return redirect(url_for('user_dashboard'))
+    return redirect(url_for('login'))
+
+@app.route('/portal')
+def portal():
+    """Serve the sequential hospital portal HTML."""
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -114,7 +144,10 @@ def login():
             session['user'] = user['username']
             session['role'] = user['role']
             flash('Logged in successfully', 'success')
-            return redirect(url_for('dashboard'))
+            if user['role'] == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('user_dashboard'))
         else:
             flash('Invalid credentials', 'danger')
     return render_template('login.html')
@@ -126,19 +159,40 @@ def logout():
     return redirect(url_for('login'))
 
 # ----------------- Dashboard -----------------
-@app.route('/dashboard')
+# ----------------- Dashboards -----------------
+@app.route('/admin')
 @login_required
-def dashboard():
+@role_required('admin')
+def admin_dashboard():
+    """Admin-specific dashboard"""
+    db = get_db()
+    total_patients = db.execute("SELECT COUNT(*) as cnt FROM patients").fetchone()['cnt']
+    total_users = db.execute("SELECT COUNT(*) as cnt FROM users").fetchone()['cnt']
+    upcoming_appointments = db.execute("SELECT COUNT(*) as cnt FROM appointments WHERE status='scheduled'").fetchone()['cnt']
+    open_alerts = db.execute("SELECT COUNT(*) as cnt FROM alerts WHERE sent=0").fetchone()['cnt']
+    recent_alerts = db.execute("SELECT a.*, p.name as patient_name FROM alerts a LEFT JOIN patients p ON a.patient_id=p.id ORDER BY a.created_at DESC LIMIT 5").fetchall()
+    return render_template('admin_dashboard.html',
+                           total_patients=total_patients,
+                           total_users=total_users,
+                           upcoming_appointments=upcoming_appointments,
+                           open_alerts=open_alerts,
+                           recent_alerts=recent_alerts)
+
+@app.route('/user')
+@login_required
+def user_dashboard():
+    """Normal user dashboard"""
     db = get_db()
     total_patients = db.execute("SELECT COUNT(*) as cnt FROM patients").fetchone()['cnt']
     upcoming_appointments = db.execute("SELECT COUNT(*) as cnt FROM appointments WHERE status='scheduled'").fetchone()['cnt']
     open_alerts = db.execute("SELECT COUNT(*) as cnt FROM alerts WHERE sent=0").fetchone()['cnt']
     recent_alerts = db.execute("SELECT a.*, p.name as patient_name FROM alerts a LEFT JOIN patients p ON a.patient_id=p.id ORDER BY a.created_at DESC LIMIT 5").fetchall()
-    return render_template('dashboard.html',
+    return render_template('user_dashboard.html',
                            total_patients=total_patients,
                            upcoming_appointments=upcoming_appointments,
                            open_alerts=open_alerts,
                            recent_alerts=recent_alerts)
+
 
 # ----------------- Patients CRUD -----------------
 @app.route('/patients')
@@ -411,3 +465,5 @@ def create_user_demo():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

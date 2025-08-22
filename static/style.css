@@ -1,0 +1,270 @@
+/* Base and background */
+body {
+    background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #223;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar */
+nav {
+    background: #3a5ba0;
+    color: #fff;
+    padding: 0.7rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    box-shadow: 0 4px 18px rgba(60, 120, 216, 0.10);
+}
+nav .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.2rem;
+}
+nav ul li {
+    display: inline;
+}
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+nav ul li a:hover, nav ul li a.active {
+    background: #5e60ce;
+    color: #fff;
+}
+
+/* Container and card */
+.container {
+    max-width: 950px;
+    margin: 36px auto 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(60, 120, 216, 0.10);
+    padding: 32px 28px;
+}
+.card {
+    background: #f7faff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(60, 120, 216, 0.08);
+    border: none;
+    margin-bottom: 24px;
+}
+.card-body {
+    padding: 24px;
+}
+.card h5, .card h6 {
+    color: #3a5ba0;
+    font-weight: 600;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #3a5ba0;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+}
+
+/* Buttons */
+.btn, button, input[type="submit"] {
+    border-radius: 8px !important;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(60, 120, 216, 0.07);
+    border: none;
+    padding: 8px 18px;
+    font-size: 1rem;
+}
+.btn-primary, .btn-success {
+    background: linear-gradient(90deg, #5e60ce 60%, #5390d9 100%);
+    color: #fff !important;
+}
+.btn-primary:hover, .btn-success:hover {
+    background: linear-gradient(90deg, #5390d9 60%, #5e60ce 100%);
+    color: #fff !important;
+    transform: translateY(-2px) scale(1.03);
+}
+.btn-danger {
+    background: linear-gradient(90deg, #ff6b6b 60%, #ff8787 100%);
+    color: #fff !important;
+}
+.btn-danger:hover {
+    background: linear-gradient(90deg, #ff8787 60%, #ff6b6b 100%);
+    color: #fff !important;
+    transform: translateY(-2px) scale(1.03);
+}
+.btn-outline-secondary {
+    border: 1px solid #5e60ce !important;
+    color: #5e60ce !important;
+    background: transparent !important;
+}
+.btn-outline-secondary:hover {
+    background: #e0eafc !important;
+    color: #3a5ba0 !important;
+}
+
+/* Table styling */
+.table {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 24px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.table th, .table td {
+    vertical-align: middle !important;
+    padding: 10px 12px !important;
+}
+.table thead th {
+    background: #e0eafc;
+    color: #3a5ba0;
+    font-weight: 600;
+    border-bottom: 2px solid #b6ccf7;
+}
+.table-hover tbody tr:hover {
+    background: #f5faff;
+    transition: background 0.2s;
+}
+
+/* Forms */
+input, select, textarea {
+    border-radius: 8px !important;
+    border: 1px solid #b6ccf7 !important;
+    transition: border-color 0.2s;
+    padding: 10px 12px;
+    font-size: 1rem;
+    background: #fafdff;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #5e60ce !important;
+    outline: none;
+}
+.form-label {
+    font-weight: 500;
+    color: #3a5ba0;
+    margin-bottom: 6px;
+}
+
+/* Alerts and flash messages */
+ul.flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 18px;
+}
+.flash {
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(60, 120, 216, 0.07);
+}
+.flash.success, .alert-success {
+    background: #e6ffed;
+    color: #256029;
+    border-left: 5px solid #38d39f;
+}
+.flash.danger, .alert-danger {
+    background: #ffe6e6;
+    color: #a94442;
+    border-left: 5px solid #ff6b6b;
+}
+.flash.warning, .alert-warning {
+    background: #fffbe6;
+    color: #8a6d3b;
+    border-left: 5px solid #ffd166;
+}
+.flash.info, .alert-info {
+    background: #e6f7ff;
+    color: #31708f;
+    border-left: 5px solid #5390d9;
+}
+
+/* Misc */
+input[type="submit"], button {
+    cursor: pointer;
+}
+a {
+    color: #5e60ce;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #3a5ba0;
+    text-decoration: underline;
+}
+.form-select {
+    border-radius: 8px !important;
+    border: 1px solid #b6ccf7 !important;
+    background: #fafdff;
+    padding: 10px 12px;
+    font-size: 1rem;
+}
+/* Add to your style.css for dashboard cards */
+/* ...existing code... */
+
+.stat-card {
+    background: linear-gradient(120deg, #e0eafc 0%, #f7faff 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(60, 120, 216, 0.10);
+    transition: box-shadow 0.2s, transform 0.2s;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stat-card:hover {
+    box-shadow: 0 8px 32px rgba(60, 120, 216, 0.18);
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* Responsive tweaks for dashboard */
+@media (max-width: 767px) {
+    .stat-card {
+        margin-bottom: 18px;
+        min-height: 120px;
+    }
+}
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    .container {
+        padding: 16px 6px;
+    }
+}
+@media (max-width: 700px) {
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.7rem 1rem;
+    }
+    .container {
+        padding: 10px 2px;
+    }
+    .card-body {
+        padding: 12px;
+    }
+    .table {
+        font-size: 0.97rem;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 1.1em;
+    }
+}

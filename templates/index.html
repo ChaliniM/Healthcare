@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hospital Portal - Full Sequential Flow with Appointment</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #e0eafc, #cfdef3);
+    min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: flex-start;
+  }
+  .container {
+    background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 100%; max-width: 700px; padding: 30px; color: #333; margin-bottom: 40px;
+  }
+  h2, h3 {
+    color: #444; margin-bottom: 15px;
+  }
+  label {
+    display: block; margin: 15px 0 6px; font-weight: 600; color: #333;
+  }
+  input, select, button {
+    width: 100%; padding: 12px; font-size: 15px; border-radius: 10px;
+    border: 1px solid #bbb; outline: none; transition: border-color 0.3s;
+  }
+ input:focus, select:focus { border-color: #5e60ce; }
+  button {
+    cursor: pointer; font-weight: bold; background: linear-gradient(to right, #43e97b, #38f9d7);
+    border: none; color: #000; margin-top: 20px; border-radius: 10px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  button:hover { transform: translateY(-2px); opacity: 0.9; }
+  nav {
+    margin-top: 20px; text-align: right;
+  }
+  nav button {
+    background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+  }
+  section { display: none; }
+  section.active { display: block; }
+  .radio-group label {
+    margin-right: 15px; font-weight: normal;
+  }
+  ul.doctors-list, ul.reviews-list, ul.treatments-list {
+    list-style: none; padding-left: 20px; color: #444;
+  }
+  ul.doctors-list li, ul.reviews-list li, ul.treatments-list li {
+    margin-bottom: 12px;
+  }
+  .doctor-name { font-weight: bold; font-size: 1.05rem; }
+  .experience { font-style: italic; color: #666; font-size: 0.9rem; margin-bottom: 4px; }
+  .review-text { margin-left: 10px; color: #333; }
+  .rating { color: #ffb400; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- AUTH PAGE -->
+  <section id="authSection" class="active">
+    <h2>Sign Up or Login to Continue</h2>
+    <div style="text-align:center; margin-bottom: 20px;">
+      <button onclick="toggleAuthForm('login')" style="margin-right: 8px;">Login</button>
+      <button onclick="toggleAuthForm('signup')">Sign Up</button>
+    </div>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <label>Mobile Number</label>
+      <input type="tel" id="loginMobile" pattern="[0-9]{10}" required />
+      <label>Password</label>
+      <input type="password" id="loginPassword" required />
+      <button type="submit">Login</button>
+    </form>
+    <form id="signupForm" onsubmit="handleSignup(event)" style="display:none;">
+      <label>Name</label>
+      <input type="text" id="signupName" required />
+      <label>Mobile Number</label>
+      <input type="tel" id="signupMobile" pattern="[0-9]{10}" required />
+      <label>State</label>
+      <select id="signupState" required onchange="populateCities()">
+        <option value="">Select state</option>
+      </select>
+      <label>City</label>
+<select id="signupCity" required><option value="">Select city</option></select>
+      <label>Password</label>
+      <input type="password" id="signupPassword" required minlength="6" />
+      <button type="submit">Sign Up</button>
+    </form>
+  </section>
+
+  <!-- ABOUT + REVIEWS PAGE -->
+  <section id="about">
+    <h2>About St Johns Medical College Hospital</h2>
+    <p>St Johns Medical College Hospital, Bangalore, is a premier multi-speciality hospital providing quality healthcare since 1963.</p>
+    <h3>Patient Reviews</h3>
+    <ul class="reviews-list">
+      <li><b>Asha</b>: <span class="review-text">Excellent care and friendly staff.</span> <span class="rating">★★★★★</span></li>
+      <li><b>Ramesh</b>: <span class="review-text">Highly recommend the cardiology department.</span> <span class="rating">★★★★☆</span></li>
+      <li><b>Priya</b>: <span class="review-text">Quick appointment booking and thorough doctors.</span> <span class="rating">★★★★★</span></li>
+    </ul>
+    <button onclick="goNext('about', 'doctors')">Next</button>
+    <nav><button onclick="logout()">Logout</button></nav>
+  </section>
+<!-- DOCTORS PAGE -->
+  <section id="doctors">
+    <h2>Our Doctors</h2>
+    <ul class="doctors-list">
+      <li><div class="doctor-name">Dr. Arjun Singh</div><div class="experience">Pediatrician - 15 years experience</div></li>
+      <li><div class="doctor-name">Dr. Priya Sharma</div><div class="experience">Cardiologist - 12 years experience</div></li>
+      <li><div class="doctor-name">Dr. Rohit Menon</div><div class="experience">Gynecologist - 10 years, reproductive endocrinology specialist</div></li>
+      <li><div class="doctor-name">Dr. Kavita Rao</div><div class="experience">Internal Medicine - 18 years</div></li>
+      <li><div class="doctor-name">Dr. Sanjay Gupta</div><div class="experience">General Physician - 20 years</div></li>
+      <li><div class="doctor-name">Dr. Monica Patel</div><div class="experience">Pediatric Surgeon - 14 years</div></li>
+      <li><div class="doctor-name">Dr. Ashok Kumar</div><div class="experience">Neonatologist - 11 years</div></li>
+      <li><div class="doctor-name">Dr. Swati Verma</div><div class="experience">Preventive Medicine - 9 years</div></li>
+      <li><div class="doctor-name">Dr. Suresh Iyer</div><div class="experience">Cardiologist (Interventional) - 16 years</div></li>
+      <li><div class="doctor-name">Dr. Neha Joshi</div><div class="experience">Obstetrician - 13 years, maternal-fetal medicine</div></li>
+    </ul>
+    <button onclick="goNext('doctors', 'treatments')">Next</button>
+    <nav><button onclick="logout()">Logout</button></nav>
+  </section>
+ <!-- TREATMENTS PAGE -->
+  <section id="treatments">
+    <h2>Treatments</h2>
+    <ul class="treatments-list">
+      <li>General Checkups</li>
+      <li>Cardiology</li>
+      <li>Orthopedics</li>
+      <li>Gynecology & Obstetrics</li>
+      <li>Pediatrics</li>
+      <li>Neurology</li>
+      <li>Emergency Services</li>
+      <li>Physiotherapy</li>
+      <li>Oncology</li>
+      <li>Preventive Medicine</li>
+    </ul>
+    <button onclick="goNext('treatments', 'appointment')">Next</button>
+    <nav><button onclick="logout()">Logout</button></nav>
+  </section>
+ <!-- APPOINTMENT PAGE -->
+  <section id="appointment">
+    <h2>Book Appointment</h2>
+    <form id="apptForm" onsubmit="handleAppointment(event)">
+      <label>Your Name</label>
+      <input type="text" id="patientName" required />
+      <label>Mobile Number</label>
+      <input type="tel" id="mobileNumber" pattern="[0-9]{10}" title="Enter 10 digit mobile number" required />
+      <label>Speciality</label>
+      <select id="speciality" required>
+        <option value="">-- Select --</option>
+        <option>General Physician / Family Doctor</option>
+        <option>Internal Medicine</option>
+        <option>Preventive Medicine</option>
+        <option>Geriatrics</option>
+        <option>Pediatrician</option>
+        <option>Neonatology</option>
+        <option>Pediatric Surgery</option>
+        <option>Pediatric Cardiology</option>
+        <option>Gynecologist / Obstetrician</option>
+        <option>Reproductive Endocrinology & Infertility</option>
+        <option>Maternal-Fetal Medicine</option>
+        <option>Urogynecology</option>
+        <option>Cardiologist (General)</option>
+        <option>Interventional Cardiology</option>
+        <option>Electrophysiology</option>
+      </select>
+<label>Have you consulted St Johns Medical College Hospital before?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="consultedBefore" value="Yes" required /> Yes</label>
+        <label><input type="radio" name="consultedBefore" value="No" /> No</label>
+      </div>
+      <label>Are you open to another similar Hospital?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="openToAnother" value="Yes" required /> Yes</label>
+        <label><input type="radio" name="openToAnother" value="No" /> No</label>
+      </div>
+      <button type="submit">Submit Appointment</button>
+    </form>
+    <nav><button onclick="logout()">Logout</button></nav>
+  </section>
+
+</div>
+
+<script>
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
+  let currentUser = JSON.parse(sessionStorage.getItem('currentUser') || null);
+
+  const statesAndCities = {
+    "Andhra Pradesh": ["Vijayawada", "Visakhapatnam", "Guntur"],
+    "Karnataka": ["Bangalore", "Mysore", "Mangalore"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"]
+  };
+ function populateStates() {
+    const stateSelect = document.getElementById('signupState');
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    Object.keys(statesAndCities).forEach(state => {
+      const opt = document.createElement('option');
+      opt.value = state;
+      opt.textContent = state;
+      stateSelect.appendChild(opt);
+    });
+  }
+
+  function populateCities() {
+    const state = document.getElementById('signupState').value;
+    const citySelect = document.getElementById('signupCity');
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    if(state && statesAndCities[state]){
+      statesAndCities[state].forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        citySelect.appendChild(opt);
+      });
+    }
+  }
+
+function toggleAuthForm(form) {
+    document.getElementById('signupForm').style.display = form === 'signup' ? 'block' : 'none';
+    document.getElementById('loginForm').style.display = form === 'login' ? 'block' : 'none';
+  }
+
+  function showSection(id) {
+    if(!currentUser && id !== 'authSection'){
+      alert('Please log in or sign up to continue.');
+      id = 'authSection';
+      toggleAuthForm('login');
+    }
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function handleSignup(e){
+    e.preventDefault();
+    const name = document.getElementById('signupName').value.trim();
+    const mobile = document.getElementById('signupMobile').value.trim();
+    const state = document.getElementById('signupState').value;
+    const city = document.getElementById('signupCity').value;
+    const password = document.getElementById('signupPassword').value.trim();
+
+    if(users[mobile]){
+      alert('Mobile number already registered');
+      return;
+    }
+users[mobile] = {name, mobile, state, city, password};
+    localStorage.setItem('users', JSON.stringify(users));
+    currentUser = users[mobile];
+    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    alert('Registered and logged in!');
+    showSection('about');
+  }
+
+  function handleLogin(e){
+    e.preventDefault();
+    const mobile = document.getElementById('loginMobile').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if(users[mobile] && users[mobile].password === password){
+      currentUser = users[mobile];
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      alert('Login successful!');
+      showSection('about');
+    } else {
+      alert('Invalid login credentials');
+    }
+  }
+function logout(){
+    currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    alert('Logged out');
+    showSection('authSection');
+  }
+
+  function goNext(currentId, nextId){
+    if(currentId === 'appointment'){
+      const form = document.getElementById('apptForm');
+      if(!form.checkValidity()){
+        alert('Please fill all appointment details accurately.');
+        return;
+      }
+    }
+    showSection(nextId);
+  }
+
+  function handleAppointment(e) {
+    e.preventDefault();
+    alert('Appointment booked successfully!');
+    document.getElementById('apptForm').reset();
+    // Stay on this last page or extend flow as needed
+  }
+window.onload = () => {
+    populateStates();
+    if(sessionStorage.getItem('currentUser')){
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+      showSection('about');
+    } else {
+      showSection('authSection');
+      toggleAuthForm('login');
+    }
+  };
+</script>
+
+</body>
+</html>
+

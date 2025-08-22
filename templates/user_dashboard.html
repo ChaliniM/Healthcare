@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Welcome, {{ session['user'] }}</h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h2>Summary</h2>
+    <ul>
+        <li>Total Patients: {{ total_patients }}</li>
+        <li>Upcoming Appointments: {{ upcoming_appointments }}</li>
+        <li>Open Alerts: {{ open_alerts }}</li>
+    </ul>
+
+    <h2>Recent Alerts</h2>
+    {% if recent_alerts %}
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Patient</th>
+            <th>Message</th>
+            <th>Severity</th>
+            <th>Created At</th>
+        </tr>
+        {% for alert in recent_alerts %}
+        <tr>
+            <td>{{ alert['patient_name'] or 'N/A' }}</td>
+            <td>{{ alert['message'] }}</td>
+            <td>{{ alert['severity'] }}</td>
+            <td>{{ alert['created_at'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No recent alerts.</p>
+    {% endif %}
+
+    <h2>Quick Links</h2>
+    <ul>
+        <li><a href="{{ url_for('patients') }}">View Patients</a></li>
+        <li><a href="{{ url_for('appointments') }}">View Appointments</a></li>
+        <li><a href="{{ url_for('alerts') }}">View Alerts</a></li>
+    </ul>
+</body>
+</html>
